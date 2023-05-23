@@ -3,7 +3,7 @@
   <SearchBar @get-results="updateResults" />
 
   <main class="mb-4 sm:mb-6 md:mb-8 lg:mb-10 xl:mb-12">
-    <MovieLists :setresults="filteredResults" />
+    <MovieLists :setresults="filteredResults" :totalP="totalPages" :pageN="pageNumber" />
   </main>
 </template>
 
@@ -17,6 +17,8 @@ import MovieLists from "./components/MovieLists.vue";
 
 const results = ref<any[]>([]);
 const filteredResults = ref<any[]>([]);
+const totalPages = ref<any[]>([]);
+const pageNumber = ref<any[]>([]);
 
 const getAllFilms = () => {
   axios
@@ -26,6 +28,8 @@ const getAllFilms = () => {
       }&language=en-US&page=1`
     )
     .then((response) => {
+      totalPages.value = response.data.total_pages;
+      pageNumber.value = response.data.page;
       results.value = response.data.results;
       filteredResults.value = results.value;
     })

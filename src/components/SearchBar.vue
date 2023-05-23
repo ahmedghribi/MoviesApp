@@ -30,6 +30,10 @@
           />
         </div>
       </div>
+      <div>
+        Tri : <span @click="noteFilter()" class="cursor-pointer">Note </span>
+        <span @click="popFilter()" class="cursor-pointer"> Popularité </span>
+      </div>
     </div>
   </div>
 </template>
@@ -56,6 +60,9 @@ function getResult(query) {
 }
 function noteFilter() {
   console.log("note");
+}
+function popFilter() {
+  console.log("pop");
 }
 </script>
 
