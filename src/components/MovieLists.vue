@@ -114,7 +114,7 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  pageN: {
+  pageNumb: {
     type: Number,
     required: true,
   },
@@ -122,7 +122,7 @@ const props = defineProps({
 
 const paginatedResults = ref<any[]>([]);
 let itemsPerPage = 10;
-const pageNumb = ref(props.pageN || 1);
+const pageNumb = ref(props.pageNumb || 1);
 
 // Calculate the total number of pages
 const totalPages = computed(() => Math.ceil(props.totalP / itemsPerPage));
