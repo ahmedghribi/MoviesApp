@@ -4,7 +4,7 @@
   >
     <div
       class="movie p-5 w-full bg-[#2a2c3c] rounded-lg flex flex-col items-center justify-center gap-4 border-[#3d3d50] border-[3px] border-solid"
-      v-for="result in setresults"
+      v-for="result in paginatedResults"
       :key="result.id"
     >
       <div class="movie-img w-full relative overflow-hidden group">
@@ -33,7 +33,12 @@
         <li>
           <a
             @click="goToPage(false)"
-            class="block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            :class="{
+              'block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
+                pageNumb !== 1,
+              'block px-3 py-2 ml-0 leading-tight text-gray-500 bg-gray-300 border border-gray-300 rounded-l-lg cursor-not-allowed':
+                pageNumb === 1,
+            }"
           >
             <span class="sr-only">Previous</span>
             <svg
@@ -51,18 +56,28 @@
             </svg>
           </a>
         </li>
-        <li v-for="item in itemsPerPage" v-bind:key="item">
+        <li v-for="page in visiblePages" :key="page">
           <a
-            @click="changePage(item)"
-            class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-            >{{ item }}</a
+            @click="changePage(page)"
+            :class="{
+              'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
+                page !== pageNumb,
+              'px-3 py-2 leading-tight text-gray-800 bg-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-white dark:bg-yellow-600 dark:border-yellow-600 dark:text-white':
+                page === pageNumb,
+            }"
           >
+            {{ page }}
+          </a>
         </li>
-
         <li>
           <a
             @click="goToPage(true)"
-            class="block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            :class="{
+              'block px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
+                pageNumb !== totalPages,
+              'block px-3 py-2 leading-tight text-gray-500 bg-gray-300 border border-gray-300 rounded-r-lg cursor-not-allowed':
+                pageNumb === totalPages,
+            }"
           >
             <span class="sr-only">Next</span>
             <svg
@@ -80,11 +95,7 @@
             </svg>
           </a>
         </li>
-        {{
-          pageNumb
-        }}/{{
-          totalPages
-        }}
+        <span> {{ pageNumb }}/{{ totalPages }} </span>
       </ul>
     </nav>
   </div>
@@ -93,6 +104,7 @@
 <script setup lang="ts">
 import { defineProps, ref, computed } from "vue";
 import axios from "axios";
+
 const props = defineProps({
   setresults: {
     type: Array,
@@ -109,20 +121,56 @@ const props = defineProps({
 });
 
 const paginatedResults = ref<any[]>([]);
-let result = props.setresults;
 let itemsPerPage = 10;
 const pageNumb = ref(props.pageN || 1);
 
-// Calculer nombre des pages
+// Calculate the total number of pages
 const totalPages = computed(() => Math.ceil(props.totalP / itemsPerPage));
 
+// Calculate the first page number to display
+const firstVisiblePage = computed(() => {
+  const currentPage = pageNumb.value;
+  if (currentPage <= 5) {
+    return 1;
+  } else if (currentPage >= totalPages.value - 4) {
+    return totalPages.value - 9;
+  } else {
+    return currentPage - 4;
+  }
+});
+
+// Generate the array of visible pages
+const visiblePages = computed(() => {
+  const firstPage = firstVisiblePage.value;
+  const lastPage = Math.min(firstPage + 9, totalPages.value);
+  return Array.from(
+    { length: lastPage - firstPage + 1 },
+    (_, index) => firstPage + index
+  );
+});
+
 const goToPage = (increment: boolean) => {
+  let newPage = pageNumb.value;
   if (increment && pageNumb.value < totalPages.value) {
-    pageNumb.value++;
-  } else if (!increment && pageNumb.value != 1) {
-    pageNumb.value--;
+    newPage++;
+  } else if (!increment && pageNumb.value > 1) {
+    newPage--;
   }
 
+  if (newPage !== pageNumb.value) {
+    pageNumb.value = newPage;
+    fetchData();
+  }
+};
+
+const changePage = (page: number) => {
+  if (page !== pageNumb.value) {
+    pageNumb.value = page;
+    fetchData();
+  }
+};
+
+const fetchData = () => {
   axios
     .get(
       `https://api.themoviedb.org/3/movie/popular?api_key=${
@@ -136,13 +184,8 @@ const goToPage = (increment: boolean) => {
       console.error("Failed to fetch films:", error);
     });
 };
-const changePage = (page: number) => {
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  paginatedResults.value = props.setresults.slice(startIndex, endIndex);
-};
 
-changePage(props.pageN);
+fetchData();
 </script>
 
 <style scoped></style>
