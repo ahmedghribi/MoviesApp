@@ -1,6 +1,5 @@
 <template>
   <Header />
-  <SearchBar @get-results="updateResults" />
 
   <main class="mb-4 sm:mb-6 md:mb-8 lg:mb-10 xl:mb-12">
     <MovieLists :setresults="filteredResults" :totalP="totalPages" :pageN="pageNumber" />
@@ -11,7 +10,6 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-import SearchBar from "./components/SearchBar.vue";
 import Header from "./components/header.vue";
 import MovieLists from "./components/MovieLists.vue";
 
@@ -36,14 +34,6 @@ const getAllFilms = () => {
     .catch((error) => {
       console.error("Failed to fetch films:", error);
     });
-};
-
-const updateResults = (content: any[]) => {
-  if (content.length === 0) {
-    filteredResults.value = results.value;
-  } else {
-    filteredResults.value = content;
-  }
 };
 
 onMounted(() => {
