@@ -1,27 +1,50 @@
-<script setup lang="ts"></script>
-
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
+  <Header />
+  <SearchBar @get-results="updateResults" />
+
+  <main class="mb-4 sm:mb-6 md:mb-8 lg:mb-10 xl:mb-12">
+    <MovieLists :setresults="filteredResults" />
+  </main>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import axios from "axios";
+
+import SearchBar from "./components/SearchBar.vue";
+import Header from "./components/header.vue";
+import MovieLists from "./components/MovieLists.vue";
+
+const results = ref<any[]>([]);
+const filteredResults = ref<any[]>([]);
+
+const getAllFilms = () => {
+  axios
+    .get(
+      `https://api.themoviedb.org/3/movie/popular?api_key=${
+        import.meta.env.VITE_API
+      }&language=en-US&page=1`
+    )
+    .then((response) => {
+      results.value = response.data.results;
+      filteredResults.value = results.value;
+    })
+    .catch((error) => {
+      console.error("Failed to fetch films:", error);
+    });
+};
+
+const updateResults = (content: any[]) => {
+  if (content.length === 0) {
+    filteredResults.value = results.value;
+  } else {
+    filteredResults.value = content;
+  }
+};
+
+onMounted(() => {
+  getAllFilms();
+});
+</script>
+
+<style scoped></style>
