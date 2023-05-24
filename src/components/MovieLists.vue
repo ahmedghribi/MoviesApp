@@ -57,7 +57,10 @@
         v-for="result in paginatedResults"
         :key="result.id"
       >
-        <div class="movie-img w-full relative overflow-hidden group">
+        <div
+          class="movie-img w-full relative overflow-hidden group cursor-pointer"
+          @click="goToMovieDetails(result)"
+        >
           <img
             class="w-full"
             :src="'http://image.tmdb.org/t/p/w500/' + result.poster_path"
@@ -153,33 +156,22 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import axios from "axios";
+import { useRouter } from "vue-router";
 
-const props = defineProps({
-  setresults: {
-    type: Array,
-    required: true,
-  },
-  totalP: {
-    type: Number,
-    required: true,
-  },
-  pageNumb: {
-    type: Number,
-    required: true,
-  },
-});
+const router = useRouter();
 
 const paginatedResults = ref<any[]>([]);
 let itemsPerPage = 10;
-const pageNumb = ref(props.pageNumb || 1);
 const query = ref("");
 const prior = ref(false);
 const note = ref(false);
+const totalP = ref<any[]>([]);
+const pageNumb = ref<any[]>([]);
 
 // Calculate the total number of pages
-const totalPages = computed(() => Math.ceil(props.totalP / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalP.value / itemsPerPage));
 
 // Calculate the first page number to display
 const firstVisiblePage = computed(() => {
@@ -236,13 +228,16 @@ const fetchData = () => {
     )
     .then((response) => {
       paginatedResults.value = response.data.results;
+      totalP.value = response.data.total_pages;
+      pageNumb.value = response.data.page;
     })
     .catch((error) => {
       console.error("Failed to fetch films:", error);
     });
 };
-
-fetchData();
+onMounted(() => {
+  fetchData();
+});
 
 // Input Search
 function getResult(query) {
@@ -284,6 +279,11 @@ const sortResults = () => {
 };
 
 watch([note, prior], sortResults);
+
+//go to movie details
+const goToMovieDetails = (movie) => {
+  router.push({ name: "MovieDetails", params: { id: movie.id } });
+};
 </script>
 
 <style scoped></style>
