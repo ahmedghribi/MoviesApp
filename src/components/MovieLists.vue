@@ -89,7 +89,7 @@
               :class="{
                 'block px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
                   pageNumb !== 1,
-                'block px-3 py-2 ml-0 leading-tight text-gray-500 bg-gray-300 border border-gray-300 rounded-l-lg cursor-not-allowed':
+                'block cursor-pointer px-3 py-2 ml-0 leading-tight text-gray-500 bg-gray-300 border border-gray-300 rounded-l-lg cursor-not-allowed':
                   pageNumb === 1,
               }"
             >
@@ -113,9 +113,9 @@
             <a
               @click="changePage(page)"
               :class="{
-                'px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
+                'px-3 py-2 cursor-pointer leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white':
                   page !== pageNumb,
-                'px-3 py-2 leading-tight text-gray-800 bg-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-white dark:bg-yellow-600 dark:border-yellow-600 dark:text-white':
+                'px-3 py-2 cursor-pointer leading-tight text-gray-800 bg-yellow-400 border border-yellow-400 hover:bg-yellow-400 hover:text-white dark:bg-yellow-600 dark:border-yellow-600 dark:text-white':
                   page === pageNumb,
               }"
             >
